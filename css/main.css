@@ -225,3 +225,121 @@ body {
 .m-page.active {
     z-index: 50;
 }
+
+.popup-loading {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1010;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    text-align: center;
+    font-size:32px;
+    color: #fff;
+    -webkit-transform-style: preserve-3d;
+}
+
+.popup-loading .loading-wrap {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 150px;
+    height: 150px;
+    margin: 0 0 0 -75px;
+}
+.popup-loading .loading-bar {
+    position: absolute;
+    top: -70px;
+    left: 50%;
+    width:60px;
+    height:60px;
+    margin-left: -30px;
+    overflow:hidden;
+    clip:rect(0 30px 60px 0);
+    -webkit-animation:loading 1.2s linear infinite;
+    -moz-animation:loading 1.2s linear infinite;
+    animation:loading 1.2s linear infinite;
+}
+.popup-loading .loading-bar:before {
+    display: block;
+    content:'';
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 2;
+    width: 60px;
+    height: 60px;
+    -webkit-border-radius: 50%;
+    -moz-border-radius: 50%;
+    border-radius: 50%;
+    overflow: hidden;
+    background: #fff;
+    background: -webkit-gradient(linear,0 0,0 100%,from(rgba(255,255,255,1)),to(rgba(255,255,255,0)));
+    background: -moz-linear-gradient(top,rgba(255,255,255,1),rgba(255,255,255,0));
+    background: linear-gradient(top,rgba(255,255,255,1),rgba(255,255,255,0));
+}
+.popup-loading .loading-bar:after {
+    display: block;
+    content:'';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    z-index: 3;
+    width:54px;
+    height:54px;
+    overflow:hidden;
+    -webkit-border-radius: 50%;
+    -moz-border-radius: 50%;
+    border-radius: 50%;
+    background-color: #000;
+}
+
+.fixed-arrow {
+    position: fixed;
+    left: 50%;
+    bottom: 25px;
+    margin-left: -50px;
+    z-index: 1000;
+    width: 100px;
+    height: 46px;
+    background: url(../images/arrow.png) no-repeat;
+    background-position: center;
+    background-size: cover;
+    -webkit-animation: arrow 1.5s infinite ease-in-out;
+    -moz-animation: arrow 1.5s infinite ease-in-out;
+    animation: arrow 1.5s infinite ease-in-out;
+}
+
+@-webkit-keyframes arrow {
+    0%, 30% {
+        opacity: 0;
+        -webkit-transform: translate3d(0, -10px, 0);
+    }
+    60% {
+        opacity: 1;
+        -webkit-transform: translate3d(0, 0, 0);
+    }
+    100% {
+        opacity: 0;
+        -webkit-transform: translate3d(0, 8px, 0);
+    }
+}
+
+@-webkit-keyframes loading {
+    0% {
+        -webkit-transform: rotate(0deg);
+    }
+    25% {
+        -webkit-transform: rotate(90deg);
+    }
+    50% {
+        -webkit-transform: rotate(180deg);
+    }
+    75% {
+        -webkit-transform: rotate(270deg);
+    }
+    100% {
+        -webkit-transform: rotate(360deg);
+    }
+}

@@ -17,11 +17,26 @@
 }(function ($) {
     "use strict";
 
+    var userAgent = navigator.userAgent;
+
     /**
      * 工具库
      * @type {Object}
      */
     var Util = {
+        UC: RegExp("Android").test( userAgent ) && RegExp("UC").test( userAgent ) ? true : false,
+        weixin: RegExp("MicroMessenger").test( userAgent ) ? true : false,
+        iPhone: RegExp("iPhone").test( userAgent )||RegExp("iPod").test( userAgent )||RegExp("iPad").test( userAgent ) ? true : false,
+        android: RegExp("Android").test( userAgent ) ? true : false,
+        isPC: function(){
+            var Agents = new Array("Android", "iPhone", "SymbianOS", "Windows Phone", "iPad", "iPod");
+            var flag = true;
+
+            for (var v = 0; v < Agents.length; v++) {
+                if (userAgent.indexOf(Agents[v]) > 0) { flag = false; break; }
+            }
+            return flag;
+        },
         elementStyle: document.createElement('div').style,
         // 判断浏览器内核类型
         vendor: function() {
@@ -111,16 +126,20 @@
         pageNow       : 0,
         // 下一个index数
         pageNext      : null,
+
         // 触摸开始获取的Y
         touchStartY   : 0,
         // 触摸移动开始
         moveStart     : true,
-        // 触摸移动的方向
-        movePosition  : null,
         // 滑动的距离
         touchDeltaY   : 0,
-        // 移动第一次
-        moveFirst     : true
+
+        // 触摸移动的方向
+        movePosition  : null,
+        // 返回第一页
+        returnFirst   : false,
+        // 第一次切换最后一页
+        returnLast    : false
     };
 
     function TouchPaging($this, options) {
@@ -130,8 +149,6 @@
 
         opts.pageNumber = this.$page.length;
 
-        console.log( this.$page.size() );
-
         this.init();
     }
 
@@ -139,6 +156,36 @@
      * 初始化
      */
     TouchPaging.prototype.init = function(){
+        // 禁止文版被拖动
+        document.body.style.userSelect = 'none';
+        document.body.style.mozUserSelect = 'none';
+        document.body.style.webkitUserSelect = 'none';
+
+        // 判断设备的类型并加上class
+        if ( Util.isPC() ) {
+            $(document.body).addClass('pc');
+        } else {
+            $(document.body).addClass('mobile');
+        }
+
+        Util.android && $(document.body).addClass('android');
+        Util.iPhone && $(document.body).addClass('iphone');
+
+        // 判断是否有3d
+        if ( !Util.hasPerspective() ) {
+            $(document.body).addClass('no-3d');
+        } else {
+            $(document.body).addClass('yes-3d');
+        }
+
+        $('.fixed-arrow').on('touchmove',function(event){
+            event.preventDefault()
+        });
+
+        // 设置页面高度
+        this.$page.height( $(window).height() );
+        $('.m-page-content').height( $(window).height() );
+
         this.onStart();
     };
 
@@ -163,9 +210,9 @@
      * 事件开始
      */
     TouchPaging.prototype.onStop = function() {
-        this.$page.on('touchstart mousedown', this.touchStart);
-        this.$page.on('touchmove mousemove', this.touchMove);
-        this.$page.on('touchend mouseup', this.touchEnd);
+        this.$page.off('touchstart mousedown');
+        this.$page.off('touchmove mousemove');
+        this.$page.off('touchend mouseup');
     };
 
     /**
@@ -228,6 +275,15 @@
             opts.movePosition = 'up';
         }
 
+        // 最后一页停止回第一页
+        if ( !opts.returnFirst && (opts.pageNow >= opts.pageNumber - 1) && opts.movePosition == 'up' ) {
+            return;
+        }
+
+        if ( opts.movePosition == 'down' ) {
+            $('.fixed-arrow').show();
+        }
+
         //设置下一页面的显示和位置
         if ( opts.touchDeltaY <= 0 ) {
             if ( $pageNow.next('.m-page').length == 0 ) {
@@ -237,7 +293,11 @@
             }
         } else {
             if ( $pageNow.prev('.m-page').length == 0 ) {
-                return;
+                if ( opts.returnLast ) {
+                    opts.pageNext = opts.pageNumber - 1;
+                } else {
+                    return;
+                }
             } else {
                 opts.pageNext = opts.pageNow - 1;
             }
@@ -248,9 +308,7 @@
         node = [now, next];
 
         // move阶段根据方向设置页面的初始化位置--执行一次
-        if ( opts.moveFirst ) {
-            initNext(node, this.$page);
-        }
+        initNext(node, this.$page);
 
         function initNext(node, $page) {
             var top, y,
@@ -333,7 +391,7 @@
         if ( !opts.pageNext && opts.pageNext != 0 ) {
             return;
         }
-        
+
         opts.moveStart = false;
 
         var touchDeltaY = Math.abs( opts.touchDeltaY );
@@ -363,6 +421,10 @@
         var that = this,
             _translateZ = Util.translateZ();
 
+        // 判断是否为最后一页，显示或者隐藏箭头
+        if ( !opts.returnFirst && opts.pageNext >= opts.pageNumber - 1 ) {
+            $('.fixed-arrow').hide();
+        }
 
         // 当前的页面切换
         var nowY = ( opts.touchDeltaY > 0 ) ? $(window).height() / 5 : -$(window).height() / 5,
@@ -373,11 +435,9 @@
         // 下一个页面的移动
         this.$page.eq( opts.pageNext )[0].style[Util.prefixStyle('transform')] = 'translate(0, 0)' + _translateZ;
 
-        // 否为最后一页，显示或者隐藏箭头
-        if ( opts.next >= opts.pageNumber - 1 ) {
-            $('.fixed-arrow').addClass('fn-hide');
-        } else {
-            $('.fixed-arrow').removeClass('fn-hide');
+        // 判断最后一页让，开启循环切换
+        if ( opts.pageNext == 0 && opts.pageNow == opts.pageNumber - 1 ) {
+            opts.returnLast = true;
         }
 
         // 删除添加的属性、Class

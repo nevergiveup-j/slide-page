@@ -31,8 +31,19 @@ if (/Android (\d+\.\d+)/.test(ua)) {
 </head>
 <body id="m-body">
 <div class="m-wrap">
+    <div class="popup-loading fn-hide">
+        <div class="loading-wrap">
+            <div class="loading-bar">
+            </div>
+            <div class="loading-text">
+                0%
+            </div>
+        </div>
+    </div>
 	<div class="m-page">
-		<img src="images/pages_1.jpg" alt="" />
+		<div class="m-page-content">
+            <img src="images/pages_1.jpg" alt="" />
+        </div>
 	</div>
 	<div class="m-page fn-hide">
 		<img src="images/pages_2.jpg" alt="" />
@@ -40,6 +51,10 @@ if (/Android (\d+\.\d+)/.test(ua)) {
 	<div class="m-page fn-hide">
 		<img src="images/pages_3.jpg" alt="" />
 	</div>
+    <div class="m-page fn-hide">
+        <img src="images/pages_4.jpg" alt="" />
+    </div>
+    <div class="fixed-arrow"></div>
 </div>
 </body>
 </html>
