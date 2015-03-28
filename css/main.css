@@ -222,3 +222,6 @@ body {
     height: 100%;
     z-index: 10;
 }
+.m-page.active {
+    z-index: 50;
+}
