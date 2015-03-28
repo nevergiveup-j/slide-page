@@ -184,17 +184,19 @@
 
         // 设置页面高度
         this.$page.height( $(window).height() );
-        $('.m-page-content').height( $(window).height() );
+        $('.page-content').height( $(window).height() );
 
-        this.onStart();
+        // 初始化
+        this.lazyIMGStart();
+        this.addEvent();
+        this.triggerFunction();
     };
 
     /**
-     * 事件开始
+     * 添加事件
      */
-    TouchPaging.prototype.onStart = function() {
+    TouchPaging.prototype.addEvent = function() {
         var that = this;
-
         that.$page.on('touchstart mousedown', function(event) {
             that.touchStart(event);
         });
@@ -207,9 +209,9 @@
     };
 
     /**
-     * 事件开始
+     * 解除事件
      */
-    TouchPaging.prototype.onStop = function() {
+    TouchPaging.prototype.removeEvent = function() {
         this.$page.off('touchstart mousedown');
         this.$page.off('touchmove mousemove');
         this.$page.off('touchend mouseup');
@@ -233,6 +235,9 @@
         }
 
         opts.touchStartY = touchY;
+
+        // start事件
+        this.$page.trigger('start', [opts]);
     };
 
     /**
@@ -255,6 +260,8 @@
 
         this.translate(node);
 
+        // move事件
+        this.$page.trigger('move', [opts]);
     };
 
     /**
@@ -412,6 +419,9 @@
         // 注销控制值
         opts.movePosition = null;
         opts.touchStartY = 0;
+
+        // end事件
+        this.$page.trigger('end', [opts]);
     };
 
     /**
@@ -463,7 +473,8 @@
 
         }, 300);
 
-
+        // 成功事件
+        this.$page.trigger('success');
     };
 
     /**
@@ -506,9 +517,119 @@
             opts.pageNext = null;
 
         }, 300);
+
+        // 成功事件
+        this.$page.trigger('fail', [opts]);
     };
 
 
-    new TouchPaging();
+    /**
+     * 开始前加载前三张页面
+     */
+    TouchPaging.prototype.lazyIMGStart = function() {
+        var $page, number = 0;
 
+        for (var i = 0; i < 8; i++ ) {
+            $page = this.$page.eq(i);
+
+            if ( !$page.length ) {
+                break;
+            }
+
+            number += 1;
+
+            if ( $page.find('.lazy-img').length ) {
+                this.loadIMG( $page, function() {
+                    //console.log( 'callback' );
+                } );
+            }
+
+        }
+    };
+
+    /**
+     * 加载图片
+     */
+    TouchPaging.prototype.loadIMG = function( $page, callback ) {
+        var $lazy = $page.find('.lazy-img'),
+            len = $lazy.length,
+            loadNumber = 0;
+
+        $lazy.each(function(i) {
+            var $self = $(this),
+                src = $self.attr('data-src'),
+                position, size;
+
+            loadNumber += 1;
+
+            $('<img />')
+                .on('load',function(){
+                    if ( $self.is('img') ) {
+                        $self.attr('src',src)
+                    } else {
+                        position = $self.attr('data-position'),
+                        size = $self.attr('data-size');
+
+                        $self.css({
+                            'background-image'	: 'url('+ src +')',
+                            'background-position'	: position,
+                            'background-size' : size
+                        })
+                    }
+
+                    // 回调函数
+                    if ( loadNumber >= len ) {
+                        callback && callback();
+                    }
+                })
+                .attr('src', src);
+        })
+    };
+
+    /**
+     * 对象函数事件绑定处理
+     * start    touch开始事件
+     * move     touch移动事件
+     * end      touch结束事件
+     * success  成功事件
+     * fail     失败事件
+     */
+    TouchPaging.prototype.triggerFunction = function() {
+
+        // touch开始事件
+        this.$page.on('start', function(event, opts) {
+            console.log( 'start' );
+        });
+
+        // touch移动事件
+        this.$page.on('move', function(event, opts) {
+            console.log( 'move' );
+        });
+
+        // touch结束事件
+        this.$page.on('end', function(event, opts) {
+            console.log( 'end' );
+        });
+
+        // 页面切换成功事件
+        this.$page.bind('success', function(event, opts) {
+            console.log( 'success' );
+        });
+
+        // 页面切换失败事件
+        this.$page.on('fail', function(event, opts) {
+            console.log( 'fail' );
+        });
+    };
+
+    // jQuery
+    $.fn.TouchPaging = function( options, callback ) {
+        return this.each(function() {
+            new TouchPaging( $(this), options, callback );
+        })
+    };
+
+    // trigger 执行多次
+    // ADM
+    return TouchPaging;
 }));
