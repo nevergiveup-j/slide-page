@@ -31,7 +31,7 @@ if (/Android (\d+\.\d+)/.test(ua)) {
 </head>
 <body id="m-body">
 <div class="m-wrap">
-    <div class="popup-loading fn-hide">
+    <div class="popup-loading">
         <div class="loading-wrap">
             <div class="loading-bar">
             </div>
@@ -42,19 +42,15 @@ if (/Android (\d+\.\d+)/.test(ua)) {
     </div>
 	<div class="m-page">
 		<div class="page-content">
-            <!--<img src="images/pages_1.jpg" alt="" />-->
             <img src="" data-src="images/pages_1.jpg" class="lazy-img" alt=""/>
-            <div class="lazy-img fn-hide" data-src="http://g.hiphotos.baidu.com/image/pic/item/d000baa1cd11728be1f6a446cbfcc3cec2fd2cfe.jpg"></div>
-            <div class="lazy-img fn-hide" data-src="http://h.hiphotos.baidu.com/image/pic/item/55e736d12f2eb93884812e94d6628535e4dd6fe3.jpg"></div>
         </div>
 	</div>
 	<div class="m-page fn-hide">
-        <div class="page-content lazy-img" data-src="images/pages_2.jpg">
-            <img src="" data-src="http://b.hiphotos.baidu.com/image/pic/item/8694a4c27d1ed21bdf16e5c5a96eddc451da3f37.jpg" class="lazy-img" alt="" />
+        <div class="page-content lazy-img" data-position="top center" data-size="cover" data-src="images/pages_2.jpg">
         </div>
 	</div>
 	<div class="m-page fn-hide">
-        <div class="page-content lazy-img" data-src="images/pages_3.jpg">
+        <div class="page-content lazy-img" data-position="top center" data-size="100% 100%" data-src="images/pages_3.jpg">
         </div>
 	</div>
     <div class="m-page fn-hide">
@@ -72,5 +68,5 @@ if (/Android (\d+\.\d+)/.test(ua)) {
 <script src="js/touchPaging.js"></script>
 
 <script>
-    $('.m-page').TouchPaging();
+    var TouchPaging = new TouchPaging('.m-page');
 </script>

@@ -1,9 +1,9 @@
 /**
- * @Description: jQuery 弹出层 插件
+ * @Description: jQuery 触屏分页插件
  * @Author: wangjun
- * @Update: 2014-8-13 16:00
+ * @Update: 2015-03-29 16:00
  * @version: 1.0
- * @Github URL: https://github.com/nevergiveup-j/HP/tree/master/popup
+ * @Github URL: https://github.com/nevergiveup-j/touchPaging
  */
  
 ;(function (factory) {
@@ -178,13 +178,11 @@
             $(document.body).addClass('yes-3d');
         }
 
-        $('.fixed-arrow').on('touchmove',function(event){
-            event.preventDefault()
-        });
-
         // 设置页面高度
         this.$page.height( $(window).height() );
         $('.page-content').height( $(window).height() );
+
+        $('body').trigger('test');
 
         // 初始化
         this.lazyIMGStart();
@@ -236,8 +234,8 @@
 
         opts.touchStartY = touchY;
 
-        // start事件
-        this.$page.trigger('start', [opts]);
+        // start事件,绑定window $page执行多次
+        $(window).trigger('start', [opts]);
     };
 
     /**
@@ -260,8 +258,8 @@
 
         this.translate(node);
 
-        // move事件
-        this.$page.trigger('move', [opts]);
+        // move事件,绑定window $page执行多次
+        $(window).trigger('move', [opts]);
     };
 
     /**
@@ -420,8 +418,8 @@
         opts.movePosition = null;
         opts.touchStartY = 0;
 
-        // end事件
-        this.$page.trigger('end', [opts]);
+        // end事件,绑定window $page执行多次
+        $(window).trigger('end', [opts]);
     };
 
     /**
@@ -473,8 +471,9 @@
 
         }, 300);
 
-        // 成功事件
-        this.$page.trigger('success');
+        // 成功事件,绑定window $page执行多次
+        $(window).trigger('success', [opts]);
+
     };
 
     /**
@@ -518,72 +517,70 @@
 
         }, 300);
 
-        // 成功事件
-        this.$page.trigger('fail', [opts]);
-    };
-
-
-    /**
-     * 开始前加载前三张页面
-     */
-    TouchPaging.prototype.lazyIMGStart = function() {
-        var $page, number = 0;
-
-        for (var i = 0; i < 8; i++ ) {
-            $page = this.$page.eq(i);
-
-            if ( !$page.length ) {
-                break;
-            }
-
-            number += 1;
-
-            if ( $page.find('.lazy-img').length ) {
-                this.loadIMG( $page, function() {
-                    //console.log( 'callback' );
-                } );
-            }
-
+        // 判断是否为最后一页，显示或者隐藏箭头
+        if ( !opts.returnFirst && opts.pageNow >= opts.pageNumber - 1 ) {
+            $('.fixed-arrow').hide();
         }
+
+        // 失败事件,绑定window $page执行多次
+        $(window).trigger('fail', [opts]);
     };
 
+
     /**
-     * 加载图片
+     * 加载延迟图片
      */
-    TouchPaging.prototype.loadIMG = function( $page, callback ) {
-        var $lazy = $page.find('.lazy-img'),
+    TouchPaging.prototype.lazyIMGStart = function( callback ) {
+        var $lazy = $('.lazy-img'),
             len = $lazy.length,
-            loadNumber = 0;
+            number = 0,
+            tao;
+
+        if ( !len ) {
+            return;
+        }
 
         $lazy.each(function(i) {
-            var $self = $(this),
-                src = $self.attr('data-src'),
-                position, size;
-
-            loadNumber += 1;
+            var self = $(this),
+                src = self.attr('data-src'),
+                position, size,
+                img;
 
             $('<img />')
                 .on('load',function(){
-                    if ( $self.is('img') ) {
-                        $self.attr('src',src)
-                    } else {
-                        position = $self.attr('data-position'),
-                        size = $self.attr('data-size');
 
-                        $self.css({
+                    // 图片
+                    if ( self.is('img') ) {
+                        self.attr('src',src)
+                    } else {
+                        position = self.attr('data-position'),
+                        size = self.attr('data-size');
+
+                        self.css({
                             'background-image'	: 'url('+ src +')',
                             'background-position'	: position,
                             'background-size' : size
                         })
                     }
 
-                    // 回调函数
-                    if ( loadNumber >= len ) {
+                    number += 1;
+
+                    // 百分比
+                    $('.loading-text').html( parseInt((number / len) * 100)+'%' );
+
+                    if ( number >= len ) {
+                        //回调函数
                         callback && callback();
+
+                        // loading hide
+                        $('.popup-loading').hide();
                     }
+
                 })
                 .attr('src', src);
-        })
+
+        });
+
     };
 
     /**
@@ -597,39 +594,41 @@
     TouchPaging.prototype.triggerFunction = function() {
 
         // touch开始事件
-        this.$page.on('start', function(event, opts) {
-            console.log( 'start' );
+        $(window).on('start', function(event, opts) {
         });
 
         // touch移动事件
-        this.$page.on('move', function(event, opts) {
-            console.log( 'move' );
+        $(window).on('move', function(event, opts) {
         });
 
         // touch结束事件
-        this.$page.on('end', function(event, opts) {
-            console.log( 'end' );
+        $(window).on('end', function(event, opts) {
         });
 
         // 页面切换成功事件
-        this.$page.bind('success', function(event, opts) {
-            console.log( 'success' );
+        $(window).on('success', function(event, opts) {
         });
 
         // 页面切换失败事件
-        this.$page.on('fail', function(event, opts) {
-            console.log( 'fail' );
+        $(window).on('fail', function(event, opts) {
         });
     };
 
-    // jQuery
-    $.fn.TouchPaging = function( options, callback ) {
-        return this.each(function() {
-            new TouchPaging( $(this), options, callback );
-        })
-    };
+    // 用jQuery插件，解除事件有问题
+    //$.fn.TouchPaging = function( options, callback ) {
+    //    return this.each(function() {
+    //        new TouchPaging( $(this), options, callback );
+    //    })
+    //};
 
-    // trigger 执行多次
+    // 给外部工具
+    window.Util = Util;
+    window.TouchPaging = TouchPaging;
+
     // ADM
-    return TouchPaging;
+    return {
+        Util: Util,
+        TouchPaging: TouchPaging
+    };
 }));
+
