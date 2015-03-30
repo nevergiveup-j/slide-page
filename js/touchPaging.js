@@ -5,7 +5,7 @@
  * @version: 1.0
  * @Github URL: https://github.com/nevergiveup-j/touchPaging
  */
- 
+
 ;(function (factory) {
     if (typeof define === "function" && define.amd) {
         // AMD模式
@@ -249,6 +249,8 @@
      */
     TouchPaging.prototype.touchMove = function(event) {
         var moveY;
+
+        event.preventDefault();
 
         if ( !opts.moveStart ) {
             return;
