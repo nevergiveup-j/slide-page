@@ -133,6 +133,8 @@
         moveStart     : true,
         // 滑动的距离
         touchDeltaY   : 0,
+        // 页面切换效果, default、scale
+        switchEffect  : 'default',
 
         // 触摸移动的方向
         movePosition  : null,
@@ -364,8 +366,13 @@
 
         var _translateZ = Util.translateZ(),
             touchDeltaY = opts.touchDeltaY,
-            scale = 1 - Math.abs( touchDeltaY * 0.2 / $(window).height()),
+            scale = 1,
             nextY, nowY;
+
+        // 页面切换缩小
+        if ( opts.switchEffect == 'scale' ) {
+            scale = 1 - Math.abs( touchDeltaY * 0.2 / $(window).height());
+        }
 
         //当前的页面移动
         if ( $(node[0]).attr('data-translate') ) {
@@ -435,8 +442,14 @@
         }
 
         // 当前的页面切换
-        var nowY = ( opts.touchDeltaY > 0 ) ? $(window).height() / 5 : -$(window).height() / 5,
-            scale = 0.1;
+        var nowY = ( opts.touchDeltaY > 0 ) ? $(window).height() : -$(window).height(),
+            scale = 1;
+
+        // 页面切换缩小
+        if ( opts.switchEffect == 'scale' ) {
+            scale = .1;
+            nowY /= 5;
+        }
 
         this.$page.eq( opts.pageNow )[0].style[Util.prefixStyle('transform')] = 'translate(0, '+ nowY +'px)' + _translateZ + 'scale('+ scale +')';
 
@@ -456,12 +469,19 @@
                 .addClass('fn-hide')
                 .removeClass('active')
                 .attr('data-translate', '')
-                .attr('style','');
+                .css({
+                    'transform': '',
+                    'transition': ''
+                });
 
+            // 下一页面
             that.$page.eq( opts.pageNext )
                 .addClass('active')
                 .attr('data-translate', '')
-                .attr('style','');
+                .css({
+                    'transform': '',
+                    'transition': ''
+                });
 
             // 还原默认值
             opts.touchDeltaY = 0;
