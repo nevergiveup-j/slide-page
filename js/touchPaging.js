@@ -144,7 +144,7 @@
         returnLast    : false
     };
 
-    function TouchPaging($this, options) {
+    function TouchPaging(options) {
 
         this.$page = $('.m-page');
         opts = $.extend(true, {}, opts, options || {});
@@ -184,7 +184,11 @@
         this.$page.height( $(window).height() );
         $('.page-content').height( $(window).height() );
 
-        $('body').trigger('test');
+        // 设置显示页面值
+        if ( opts.pageNow != 0 ) {
+            this.$page.addClass('fn-hide');
+            this.$page.eq( opts.pageNow ).removeClass('fn-hide');
+        }
 
         // 初始化
         this.lazyIMGStart();
