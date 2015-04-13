@@ -226,7 +226,7 @@ body {
 .m-page img {
     width: 100%;
 }
-.m-page.active {
+.page-active {
     z-index: 50;
 }
 

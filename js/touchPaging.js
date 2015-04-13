@@ -138,10 +138,16 @@
 
         // 触摸移动的方向
         movePosition  : null,
+        movePositionF : null,
         // 返回第一页
         returnFirst   : false,
         // 第一次切换最后一页
-        returnLast    : false
+        returnLast    : false,
+        // 鼠标是否按下
+        mouseDown     : false,
+        // 移动开始设置
+        moveFirst     : true,
+        moveInit      : false
     };
 
     function TouchPaging(options) {
@@ -187,8 +193,12 @@
         // 设置显示页面值
         if ( opts.pageNow != 0 ) {
             this.$page.addClass('fn-hide');
-            this.$page.eq( opts.pageNow ).removeClass('fn-hide');
         }
+
+        this.$page
+            .eq( opts.pageNow )
+            .removeClass('fn-hide')
+            .addClass('page-active fn-animations');
 
         // 初始化
         this.lazyIMGStart();
@@ -236,9 +246,11 @@
             touchY = event.touches[0].pageY;
         } else {
             touchY = event.pageY || event.y;
+            opts.mouseDown = true;
         }
 
         opts.touchStartY = touchY;
+        opts.moveInit = true;
 
         // start事件,绑定window $page执行多次
         $(window).trigger('start', [opts]);
@@ -252,14 +264,18 @@
 
         event.preventDefault();
 
-        if ( !opts.moveStart ) {
+        if ( !opts.moveStart || !opts.moveInit ) {
             return;
         }
 
         if ( event.type == "touchmove" ) {
             moveY = event.touches[0].pageY;
         } else {
-            moveY = event.pageY || event.y;
+            if ( opts.mouseDown ) {
+                moveY = event.pageY || event.y;
+            } else {
+                return;
+            }
         }
 
         var node = this.direction(event, moveY);
@@ -297,6 +313,13 @@
             $('.fixed-arrow').show();
         }
 
+        if ( opts.movePosition != opts.movePositionC ) {
+            opts.movePositionC = opts.movePosition;
+            opts.moveFirst = true;
+        } else {
+            opts.moveFirst = false;
+        }
+
         //设置下一页面的显示和位置
         if ( opts.touchDeltaY <= 0 ) {
             if ( $pageNow.next('.m-page').length == 0 ) {
@@ -321,21 +344,22 @@
         node = [now, next];
 
         // move阶段根据方向设置页面的初始化位置--执行一次
-        initNext(node, this.$page);
+        if ( opts.moveFirst ) {
+            initNext(node, this.$page);
+        }
 
         function initNext(node, $page) {
             var top, y,
                 _translateZ = Util.translateZ();
 
-            $page.removeClass('active');
+            $page.removeClass('page-active');
             $(node[0])
                 .removeClass('fn-hide');
-                //.addClass('active');
 
             // 显示对应移动的page
             $(node[1])
                 .removeClass('fn-hide')
-                .addClass('active');
+                .addClass('page-active');
 
 
             // 设置下一页的显示和位置
@@ -400,17 +424,19 @@
      * 触摸移动end
      */
     TouchPaging.prototype.touchEnd = function() {
+        opts.moveInit = false;
+        opts.mouseDown = false;
 
         if ( !opts.moveStart ) {
             return;
         }
 
+        opts.moveStart = false;
+
         // 第一页UP阻止
         if ( !opts.pageNext && opts.pageNext != 0 ) {
             return;
         }
-
-        opts.moveStart = false;
 
         var touchDeltaY = Math.abs( opts.touchDeltaY );
 
@@ -429,6 +455,7 @@
 
         // 注销控制值
         opts.movePosition = null;
+        opts.movePositionC = null;
         opts.touchStartY = 0;
 
         // end事件,绑定window $page执行多次
@@ -473,28 +500,37 @@
             // 当前页面
             that.$page.eq( opts.pageNow )
                 .addClass('fn-hide')
-                .removeClass('active')
-                .attr('data-translate', '')
-                .css({
-                    'transform': '',
-                    'transition': ''
-                });
+                .removeClass('page-active')
+                .attr('data-translate', '');
+
+            that.$page.eq( opts.pageNow )[0].style[Util.prefixStyle('transform')] = '';
+            that.$page.eq( opts.pageNow )[0].style[Util.prefixStyle('transition')] = '';    
 
             // 下一页面
             that.$page.eq( opts.pageNext )
-                .addClass('active')
-                .attr('data-translate', '')
-                .css({
-                    'transform': '',
-                    'transition': ''
-                });
+                .addClass('page-active')
+                .attr('data-translate', '');
+
+            that.$page.eq( opts.pageNext )[0].style[Util.prefixStyle('transform')] = '';
+            that.$page.eq( opts.pageNext )[0].style[Util.prefixStyle('transition')] = '';    
 
             // 还原默认值
             opts.touchDeltaY = 0;
             opts.moveStart = true;
+            opts.moveFirst = true;
             opts.pageNow = opts.pageNext;
             opts.pageNext = null;
 
+            // 当前页面执行动画
+            setTimeout(function() {
+                if ( that.$page.eq( opts.pageNow ).hasClass('fn-animations') ) {
+                    return;
+                }
+
+                that.$page.removeClass('fn-animations');
+                that.$page.eq( opts.pageNow ).addClass('fn-animations');
+                   
+            }, 30);    
         }, 300);
 
         // 成功事件,绑定window $page执行多次
@@ -526,19 +562,24 @@
 
             // 当前页面
             that.$page.eq( opts.pageNow )
-                .addClass('active')
-                .attr('data-translate', '')
-                .attr('style','');
+                .addClass('page-active')
+                .attr('data-translate', '');
+
+            that.$page.eq( opts.pageNow )[0].style[Util.prefixStyle('transform')] = '';
+            that.$page.eq( opts.pageNow )[0].style[Util.prefixStyle('transition')] = '';    
 
             that.$page.eq( opts.pageNext )
                 .addClass('fn-hide')
-                .removeClass('active')
-                .attr('data-translate', '')
-                .attr('style','');
+                .removeClass('page-active')
+                .attr('data-translate', '');
+
+            that.$page.eq( opts.pageNext )[0].style[Util.prefixStyle('transform')] = '';
+            that.$page.eq( opts.pageNext )[0].style[Util.prefixStyle('transition')] = '';    
 
             // 还原默认值
             opts.touchDeltaY = 0;
             opts.moveStart = true;
+            opts.moveFirst = true;
             opts.pageNext = null;
 
         }, 300);
@@ -559,8 +600,7 @@
     TouchPaging.prototype.lazyIMGStart = function( callback ) {
         var $lazy = $('.lazy-img'),
             len = $lazy.length,
-            number = 0,
-            tao;
+            number = 0;
 
         if ( !len ) {
             return;
@@ -568,44 +608,52 @@
 
         $lazy.each(function(i) {
             var self = $(this),
-                src = self.attr('data-src'),
-                position, size,
-                img;
+                src = self.attr('data-src');
 
             $('<img />')
                 .on('load',function(){
-
-                    // 图片
-                    if ( self.is('img') ) {
-                        self.attr('src',src)
-                    } else {
-                        position = self.attr('data-position'),
-                        size = self.attr('data-size');
-
-                        self.css({
-                            'background-image'	: 'url('+ src +')',
-                            'background-position'	: position,
-                            'background-size' : size
-                        })
-                    }
-
-                    number += 1;
-
-                    // 百分比
-                    $('.loading-text').html( parseInt((number / len) * 100)+'%' );
-
-                    if ( number >= len ) {
-                        //回调函数
-                        callback && callback();
-
-                        // loading hide
-                        $('.popup-loading').hide();
-                    }
-
+                    setImgUrl(self, src);
+                })
+                .error(function() {
+                    setImgUrl(self, src);
                 })
                 .attr('src', src);
 
         });
+
+
+        function setImgUrl(self, src) {
+            var position, size, repeat, img;
+
+            // 图片
+            if ( self.is('img') ) {
+                self.attr('src',src)
+            } else {
+                position = self.attr('data-position');
+                size = self.attr('data-size');
+                repeat = self.attr('data-repeat');
+
+                self.css({
+                    'background-image'      : 'url('+ src +')',
+                    'background-position'   : position,
+                    'background-size'       : size,
+                    'background-repeat'     : repeat
+                })
+            }
+
+            number += 1;
+
+            // 百分比
+            $('.loading-text').html( parseInt((number / len) * 100)+'%' );
+
+            if ( number >= len ) {
+                //回调函数
+                callback && callback();
+
+                // loading hide
+                $('.popup-loading').hide();
+            }
+        }
 
     };
 
