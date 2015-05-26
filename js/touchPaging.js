@@ -1,8 +1,8 @@
 /**
  * @Description: jQuery 触屏分页插件
  * @Author: wangjun
- * @Update: 2015-03-29 16:00
- * @version: 1.0
+ * @Update: 2015-05-26 16:00
+ * @version: 1.1
  * @Github URL: https://github.com/nevergiveup-j/touchPaging
  */
 
@@ -115,7 +115,21 @@
             }
 
             return !!ret;
-        }
+        },
+        //禁止滚动条
+        scrollStop      : function(){
+            //禁止滚动
+            $(window).on('touchmove.scroll',Util.scrollControl);
+            $(window).on('scroll.scroll',Util.scrollControl);
+        },
+        //启动滚动条
+        scrollStart     : function(){
+            //开启屏幕禁止
+            $(window).off('touchmove.scroll');
+            $(window).off('scroll.scroll');
+        },
+        //滚动条控制事件
+        scrollControl   : function(e){e.preventDefault();}
     };
 
 
@@ -134,25 +148,29 @@
         // 滑动的距离
         touchDeltaY   : 0,
         // 页面切换效果, default、scale
-        switchEffect  : 'default',
+        switchEffect   : 'default',
 
+        // 页面中是否有滚动条
+        isSrcoll       : false,
+        // 开始滚动条位置
+        startScrollTop : null,
         // 触摸移动的方向
-        movePosition  : null,
-        movePositionF : null,
+        movePosition   : null,
+        movePositionC   : null,
         // 返回第一页
-        returnFirst   : false,
+        returnFirst    : false,
         // 第一次切换最后一页
-        returnLast    : false,
-        // 鼠标是否按下
-        mouseDown     : false,
-        // 移动开始设置
-        moveFirst     : true,
-        moveInit      : false
+        returnLast     : false,
+        moveFirst      : true,
+        moveInit       : false,
+        // 判断鼠标是否按下
+        mouseDown      : false
     };
 
     function TouchPaging(options) {
 
         this.$page = $('.m-page');
+        this.$pageSrcoll = null;
         opts = $.extend(true, {}, opts, options || {});
 
         opts.pageNumber = this.$page.length;
@@ -188,17 +206,17 @@
 
         // 设置页面高度
         this.$page.height( $(window).height() );
-        $('.page-content').height( $(window).height() );
+        $('.page-content').css({
+            'height' : $(window).height()
+        });
 
         // 设置显示页面值
         if ( opts.pageNow != 0 ) {
             this.$page.addClass('fn-hide');
+            this.$page.eq( opts.pageNow )
+                .removeClass('fn-hide')
+                .addClass('page-active animations');
         }
-
-        this.$page
-            .eq( opts.pageNow )
-            .removeClass('fn-hide')
-            .addClass('page-active fn-animations');
 
         // 初始化
         this.lazyIMGStart();
@@ -211,13 +229,13 @@
      */
     TouchPaging.prototype.addEvent = function() {
         var that = this;
-        that.$page.on('touchstart mousedown', function(event) {
+        $(window).on('touchstart mousedown', function(event) {
             that.touchStart(event);
         });
-        that.$page.on('touchmove mousemove', function(event) {
+        $(window).on('touchmove mousemove', function(event) {
             that.touchMove(event);
         });
-        that.$page.on('touchend mouseup', function(event) {
+        $(window).on('touchend mouseup', function(event) {
             that.touchEnd(event);
         });
     };
@@ -226,9 +244,9 @@
      * 解除事件
      */
     TouchPaging.prototype.removeEvent = function() {
-        this.$page.off('touchstart mousedown');
-        this.$page.off('touchmove mousemove');
-        this.$page.off('touchend mouseup');
+        $(window).off('touchstart mousedown');
+        $(window).off('touchmove mousemove');
+        $(window).off('touchend mouseup');
     };
 
     /**
@@ -243,7 +261,7 @@
         }
 
         if ( event.type == "touchstart" ) {
-            touchY = event.touches[0].pageY;
+            touchY = window.event.touches[0].pageY;
         } else {
             touchY = event.pageY || event.y;
             opts.mouseDown = true;
@@ -253,7 +271,7 @@
         opts.moveInit = true;
 
         // start事件,绑定window $page执行多次
-        $(window).trigger('start', [opts]);
+        $(window).trigger('start', [event, opts]);
     };
 
     /**
@@ -269,29 +287,15 @@
         }
 
         if ( event.type == "touchmove" ) {
-            moveY = event.touches[0].pageY;
+            moveY = window.event.touches[0].pageY;
         } else {
             if ( opts.mouseDown ) {
                 moveY = event.pageY || event.y;
             } else {
                 return;
             }
+
         }
-
-        var node = this.direction(event, moveY);
-
-        this.translate(node);
-
-        // move事件,绑定window $page执行多次
-        $(window).trigger('move', [opts]);
-    };
-
-    /**
-     * Move触摸移动判断方向
-     */
-    TouchPaging.prototype.direction = function(event, moveY) {
-        var now, next, node,
-            $pageNow = this.$page.eq( opts.pageNow);
 
         if ( moveY != 'undefined' ) {
             opts.touchDeltaY = moveY - opts.touchStartY;
@@ -303,6 +307,21 @@
         } else {
             opts.movePosition = 'up';
         }
+
+        var node = this.direction(event);
+
+        this.translate(node);
+
+        // move事件,绑定window $page执行多次
+        $(window).trigger('move', [event, opts]);
+    };
+
+    /**
+     * Move触摸移动判断方向
+     */
+    TouchPaging.prototype.direction = function(event) {
+        var now, next, node,
+            $pageNow = this.$page.eq( opts.pageNow);
 
         // 最后一页停止回第一页
         if ( !opts.returnFirst && (opts.pageNow >= opts.pageNumber - 1) && opts.movePosition == 'up' ) {
@@ -341,6 +360,7 @@
 
         now = this.$page.eq( opts.pageNow )[0];
         next = this.$page.eq( opts.pageNext )[0];
+
         node = [now, next];
 
         // move阶段根据方向设置页面的初始化位置--执行一次
@@ -355,6 +375,7 @@
             $page.removeClass('page-active');
             $(node[0])
                 .removeClass('fn-hide');
+                //.addClass('page-active');
 
             // 显示对应移动的page
             $(node[1])
@@ -423,7 +444,7 @@
     /**
      * 触摸移动end
      */
-    TouchPaging.prototype.touchEnd = function() {
+    TouchPaging.prototype.touchEnd = function(event) {
         opts.moveInit = false;
         opts.mouseDown = false;
 
@@ -431,12 +452,12 @@
             return;
         }
 
-        opts.moveStart = false;
-
         // 第一页UP阻止
         if ( !opts.pageNext && opts.pageNext != 0 ) {
             return;
         }
+
+        opts.moveStart = false;
 
         var touchDeltaY = Math.abs( opts.touchDeltaY );
 
@@ -459,7 +480,7 @@
         opts.touchStartY = 0;
 
         // end事件,绑定window $page执行多次
-        $(window).trigger('end', [opts]);
+        $(window).trigger('end', [event, opts]);
     };
 
     /**
@@ -504,7 +525,7 @@
                 .attr('data-translate', '');
 
             that.$page.eq( opts.pageNow )[0].style[Util.prefixStyle('transform')] = '';
-            that.$page.eq( opts.pageNow )[0].style[Util.prefixStyle('transition')] = '';    
+            that.$page.eq( opts.pageNow )[0].style[Util.prefixStyle('transition')] = '';
 
             // 下一页面
             that.$page.eq( opts.pageNext )
@@ -512,7 +533,7 @@
                 .attr('data-translate', '');
 
             that.$page.eq( opts.pageNext )[0].style[Util.prefixStyle('transform')] = '';
-            that.$page.eq( opts.pageNext )[0].style[Util.prefixStyle('transition')] = '';    
+            that.$page.eq( opts.pageNext )[0].style[Util.prefixStyle('transition')] = '';
 
             // 还原默认值
             opts.touchDeltaY = 0;
@@ -521,20 +542,10 @@
             opts.pageNow = opts.pageNext;
             opts.pageNext = null;
 
-            // 当前页面执行动画
-            setTimeout(function() {
-                if ( that.$page.eq( opts.pageNow ).hasClass('fn-animations') ) {
-                    return;
-                }
-
-                that.$page.removeClass('fn-animations');
-                that.$page.eq( opts.pageNow ).addClass('fn-animations');
-                   
-            }, 30);    
         }, 300);
 
         // 成功事件,绑定window $page执行多次
-        $(window).trigger('success', [opts]);
+        $(window).trigger('success', opts);
 
     };
 
@@ -563,10 +574,14 @@
             // 当前页面
             that.$page.eq( opts.pageNow )
                 .addClass('page-active')
-                .attr('data-translate', '');
+                .attr('data-translate', '')
+                .css({
+                    'transform': '',
+                    'transition': ''
+                });
 
             that.$page.eq( opts.pageNow )[0].style[Util.prefixStyle('transform')] = '';
-            that.$page.eq( opts.pageNow )[0].style[Util.prefixStyle('transition')] = '';    
+            that.$page.eq( opts.pageNow )[0].style[Util.prefixStyle('transition')] = '';
 
             that.$page.eq( opts.pageNext )
                 .addClass('fn-hide')
@@ -574,7 +589,7 @@
                 .attr('data-translate', '');
 
             that.$page.eq( opts.pageNext )[0].style[Util.prefixStyle('transform')] = '';
-            that.$page.eq( opts.pageNext )[0].style[Util.prefixStyle('transition')] = '';    
+            that.$page.eq( opts.pageNext )[0].style[Util.prefixStyle('transition')] = '';
 
             // 还原默认值
             opts.touchDeltaY = 0;
@@ -590,9 +605,27 @@
         }
 
         // 失败事件,绑定window $page执行多次
-        $(window).trigger('fail', [opts]);
+        $(window).trigger('fail', opts);
     };
 
+    /**
+     * 切换失败
+     */
+    TouchPaging.prototype.nextPage = function() {
+        opts.touchDeltaY = 200;
+        opts.pageNext = opts.pageNow + 1;
+
+        this.$page.removeClass('page-active');
+        this.$page.eq( opts.pageNow )
+            .removeClass('fn-hide');
+
+        // 显示对应移动的page
+        this.$page.eq( opts.pageNext )
+            .removeClass('fn-hide')
+            .addClass('page-active');
+
+        this.touchEnd();
+    };
 
     /**
      * 加载延迟图片
@@ -600,7 +633,8 @@
     TouchPaging.prototype.lazyIMGStart = function( callback ) {
         var $lazy = $('.lazy-img'),
             len = $lazy.length,
-            number = 0;
+            number = 0,
+            tao;
 
         if ( !len ) {
             return;
@@ -666,25 +700,30 @@
      * fail     失败事件
      */
     TouchPaging.prototype.triggerFunction = function() {
+        var that = this;
 
         // touch开始事件
-        $(window).on('start', function(event, opts) {
+        $(window).on('start', function(thisEvent, event, options) {
         });
 
         // touch移动事件
-        $(window).on('move', function(event, opts) {
+        $(window).on('move', function(thisEvent, event, options) {
         });
 
         // touch结束事件
-        $(window).on('end', function(event, opts) {
+        $(window).on('end', function(thisEvent, event, options) {
         });
 
         // 页面切换成功事件
-        $(window).on('success', function(event, opts) {
+        $(window).on('success', function(event, options) {
+
+            that.$page.removeClass('animations');
+            that.$page.eq( opts.pageNext ).addClass('animations');
+
         });
 
         // 页面切换失败事件
-        $(window).on('fail', function(event, opts) {
+        $(window).on('fail', function(event, options) {
         });
     };
 

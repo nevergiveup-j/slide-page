@@ -223,10 +223,8 @@ body {
     height: 100%;
     z-index: 10;
 }
-.m-page img {
-    width: 100%;
-}
-.page-active {
+
+.m-page.page-active {
     z-index: 50;
 }
 
@@ -346,4 +344,9 @@ body {
     100% {
         -webkit-transform: rotate(360deg);
     }
+}
+
+
+.m-page img {
+   width: 100%;
 }
