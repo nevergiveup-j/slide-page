@@ -119,14 +119,14 @@
         scrollControl   : function(e){e.preventDefault();}
     };
 
-    function TouchPaging(options) {
+    function SlidePage(options) {
         this.init(options);
     }
 
     /**
      * 初始化
      */
-    TouchPaging.prototype.init = function(options){
+    SlidePage.prototype.init = function(options){
         var that = this;
 
         // 默认配置
@@ -215,7 +215,7 @@
     /**
      * 添加事件
      */
-    TouchPaging.prototype.addEvent = function() {
+    SlidePage.prototype.addEvent = function() {
         var that = this;
         $(window).on('touchstart mousedown', function(event) {
             that.touchStart(event);
@@ -231,7 +231,7 @@
     /**
      * 解除事件
      */
-    TouchPaging.prototype.removeEvent = function() {
+    SlidePage.prototype.removeEvent = function() {
         $(window).off('touchstart mousedown');
         $(window).off('touchmove mousemove');
         $(window).off('touchend mouseup');
@@ -240,7 +240,7 @@
     /**
      * 触摸移动start
      */
-    TouchPaging.prototype.touchStart = function(event) {
+    SlidePage.prototype.touchStart = function(event) {
         var that = this;
         var touchY = 0;
 
@@ -260,7 +260,7 @@
     /**
      * 触摸移动Move
      */
-    TouchPaging.prototype.touchMove = function(event) {
+    SlidePage.prototype.touchMove = function(event) {
         var pageY,
             opts = this.opts;
 
@@ -330,7 +330,7 @@
     /**
      * 触摸移动end
      */
-    TouchPaging.prototype.touchEnd = function(event) {
+    SlidePage.prototype.touchEnd = function(event) {
         var that = this;
 
         this.isMouseDown = false;
@@ -358,7 +358,7 @@
     /**
      * 设置下一页动画初始化
      */
-    TouchPaging.prototype.setInitNext = function() {
+    SlidePage.prototype.setInitNext = function() {
         var top = 0,
             _translateZ = Util.translateZ();
 
@@ -383,7 +383,7 @@
     /**
      * move平移
      */
-    TouchPaging.prototype.moveTranslate = function() {
+    SlidePage.prototype.moveTranslate = function() {
         var _translateZ = Util.translateZ(),
             scale = 1;
 
@@ -402,7 +402,7 @@
     /**
      * 切换页面
      */
-    TouchPaging.prototype.togglePage = function(status) {
+    SlidePage.prototype.togglePage = function(status) {
         var that = this,
             _translateZ = Util.translateZ(),
             toggleStatus = 'success',
@@ -479,7 +479,7 @@
     /**
      * 上一页
      */
-    TouchPaging.prototype.prevPage = function() {
+    SlidePage.prototype.prevPage = function() {
         var that = this,
             isEndPage = (this.opts.pageNow == 0);
 
@@ -512,7 +512,7 @@
     /**
      * 下一页
      */
-    TouchPaging.prototype.nextPage = function() {
+    SlidePage.prototype.nextPage = function() {
         var that = this,
             isEndPage = (this.opts.pageNow >= this.opts.pageTotal - 1);
 
@@ -541,12 +541,12 @@
 
     // 给外部工具
     window.Util = Util;
-    window.TouchPaging = TouchPaging;
+    window.SlidePage = SlidePage;
 
     // ADM
     return {
         Util: Util,
-        TouchPaging: TouchPaging
+        SlidePage: SlidePage
     };
 }));
 
