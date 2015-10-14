@@ -27,7 +27,7 @@ module.exports = function(grunt) {
                     {
                         expand: true,
                         cwd: 'js/', // 需要压缩的文件夹路径
-                        src: ['touchPaging.js'], // 需要压缩的文件
+                        src: ['slide-page.js'], // 需要压缩的文件
                         dest: 'js/', // 压缩后存放的路径
                         ext: '.min.js' // 压缩后的扩展名
                     }

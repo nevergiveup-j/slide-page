@@ -26,10 +26,12 @@ if (/Android (\d+\.\d+)/.test(ua)) {
 }
 </script>
 <!--移动端版本兼容 end -->
+<meta name="format-detection" content="telephone=no">
+<meta name="apple-mobile-web-app-capable" content="yes" />
 <link rel="stylesheet" type="text/css" href="css/main.css">
-<title>触屏分页</title>
+<title>H5 滑动翻页</title>
 </head>
-<body id="m-body">
+<body>
 <div class="m-wrap">
     <div class="popup-loading">
         <div class="loading-wrap">
@@ -42,32 +44,60 @@ if (/Android (\d+\.\d+)/.test(ua)) {
     </div>
 	<div class="m-page">
 		<div class="page-content">
-            <img src="" data-src="images/pages_1.jpg" class="lazy-img" alt=""/>
+            <img src="images/pages_1.jpg" data-src="" class="lazy-img" alt=""/>
         </div>
-	</div>
-	<div class="m-page fn-hide">
-        <div class="page-content lazy-img" data-position="top center" data-size="cover" data-src="images/pages_2.jpg">
+    </div>
+    <div class="m-page fn-hide">
+        <div class="page-content lazy-img">
+            <img src="images/pages_2.jpg" data-src="" class="lazy-img" alt=""/>
         </div>
-	</div>
-	<div class="m-page fn-hide">
-        <div class="page-content lazy-img" data-position="top center" data-size="100% 100%" data-src="images/pages_3.jpg">
+    </div>
+    <div class="m-page fn-hide">
+        <div class="page-content lazy-img">
+            <img src="images/pages_3.jpg" data-src="" class="lazy-img" alt=""/>
         </div>
-	</div>
+    </div>
     <div class="m-page fn-hide">
         <div class="page-content">
-            <img src="" data-src="images/pages_4.jpg" class="lazy-img" alt="" />
+            <img src="images/pages_4.jpg" data-src="" class="lazy-img" alt="" />
         </div>
     </div>
     <div class="fixed-arrow"></div>
 </div>
+
+<!--<a href="javascript:" style="position: fixed;top:0;left:0;z-index: 9999;background: #fff;width: 100px;height: 100px;" class="page-next">下一页</a>-->
 </body>
 </html>
 <script src="js/zepto.min.js"></script>
-<script src="js/touch-0.2.14.min.js"></script>
-<script src="js/hammer.min.js"></script>
-<script src="js/touchPaging.js"></script>
+<script src="js/slide-page.js"></script>
+
 
 <script>
     var TouchPaging = new TouchPaging({
+        lastReturnFirst: true,
+        // 触摸开始回调
+        touchStartCallback: function(event, options){
+
+        },
+        // 触摸移动回调
+        touchMoveCallback: function(event, options){
+
+        },
+        // 触摸结束回调
+        touchEndCallback: function(event, options){
+
+        },
+        // 页面切换成功
+        successCallback:  function(options) {
+
+        },
+        // 页面切换失败
+        failCallback:  function(options) {
+
+        }
     });
+
+//    $('.page-next').on('click', function() {
+//        TouchPaging.nextPage();
+//    })
 </script>
