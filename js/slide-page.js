@@ -206,6 +206,7 @@
         this.moveDirectionInit = false;
         this.isMouseDown = false;
         this.isTouchStart = false;
+        this.isClickButton = false;
 
             // 初始化
         this.addEvent();
@@ -375,6 +376,8 @@
             .removeClass('fn-hide')
             .addClass('page-active')
             .attr('data-translate', top);
+
+        this.$pageNext[0].style[Util.prefixStyle('transform')] = 'translate(0, ' + top + 'px)' + _translateZ;
     };
 
     /**
@@ -414,6 +417,9 @@
             nowY = 0;
             nextY = (this.opts.moveDirection == 'up') ? this.viewHeight : -this.viewHeight;
         }
+
+        this.$pageNow = this.$pages.eq(this.opts.pageNow);
+        this.$pageNext = this.$pages.eq(this.opts.pageNext);
 
         // 添加动画事件
         this.$pageNow[0].style[Util.prefixStyle('transition')] = 'all .3s';
@@ -463,9 +469,74 @@
             that.$pageNext[0].style[Util.prefixStyle('transform')] = '';
 
             that.isTouchMove = false;
+            that.isClickButton = false;
             that.moveDirectionInit = false;
             that.opts.pageNext = null;
+
         }, 300);
+    };
+
+    /**
+     * 上一页
+     */
+    TouchPaging.prototype.prevPage = function() {
+        var that = this,
+            isEndPage = (this.opts.pageNow == 0);
+
+        if(this.isClickButton || (!this.opts.lastReturnFirst && isEndPage)){
+            return;
+        }
+
+        this.opts.moveDirection = 'down';
+        this.isClickButton = true;
+        this.currentY = 100;
+
+        if(isEndPage){
+            this.opts.pageNext = this.opts.pageTotal - 1;
+        }else{
+            this.opts.pageNext = this.opts.pageNow - 1;
+        }
+
+        this.$pageNow = this.$pages.eq(this.opts.pageNow);
+        this.$pageNext = this.$pages.eq(this.opts.pageNext);
+
+        this.setInitNext();
+
+        setTimeout(function(){
+            that.togglePage('success');
+            that.currentY = 0;
+        }, 100)
+    };
+
+
+    /**
+     * 下一页
+     */
+    TouchPaging.prototype.nextPage = function() {
+        var that = this,
+            isEndPage = (this.opts.pageNow >= this.opts.pageTotal - 1);
+
+        if(this.isClickButton || (!this.opts.lastReturnFirst && isEndPage)){
+            return;
+        }
+
+        this.opts.moveDirection = 'up';
+        this.isClickButton = true;
+
+        if(isEndPage){
+            this.opts.pageNext = 0;
+        }else{
+            this.opts.pageNext = this.opts.pageNow + 1;
+        }
+
+        this.$pageNow = this.$pages.eq(this.opts.pageNow);
+        this.$pageNext = this.$pages.eq(this.opts.pageNext);
+
+        this.setInitNext();
+
+        setTimeout(function(){
+            that.togglePage('success');
+        }, 100)
     };
 
     // 给外部工具
