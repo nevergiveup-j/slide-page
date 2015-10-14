@@ -215,6 +215,13 @@
     /**
      * 添加事件
      */
+    SlidePage.prototype.loadingIMG = function() {
+
+    };
+
+    /**
+     * 添加事件
+     */
     SlidePage.prototype.addEvent = function() {
         var that = this;
         $(window).on('touchstart mousedown', function(event) {
