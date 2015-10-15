@@ -133,6 +133,10 @@
         var opts = {
             // 页面列表
             pages: '.m-page',
+            // 加载图片标签
+            loadIMG: 'img',
+            // 不使用IMG标签，data入口
+            loadImgData: [],
             // 页面切换效果, default、scale
             switchEffect: 'default',
             // 最后一页返回第一页
@@ -208,15 +212,56 @@
         this.isTouchStart = false;
         this.isClickButton = false;
 
-            // 初始化
+        // 初始化
+        this.loadIMGStart();
         this.addEvent();
     };
 
     /**
      * 添加事件
      */
-    SlidePage.prototype.loadingIMG = function() {
+    SlidePage.prototype.loadIMGStart = function(callback) {
+        var that = this,
+            $img = $('img'),
+            imgData = this.opts.loadImgData,
+            len = 0,
+            count = 0,
+            link;
 
+        $img.length && $img.each(function(i) {
+            link = $(this).attr('src');
+            imgData.push(link);
+        });
+
+        len = imgData.length;
+
+        for(var i = 0; i < len; i++) {
+            link = imgData[i];
+
+            $('<img />')
+                .on('load',function(){
+                    setImgUrl();
+                })
+                .error(function() {
+                    setImgUrl();
+                })
+                .attr('src', link);
+        }
+
+        function setImgUrl() {
+            count += 1;
+
+            // 百分比
+            $('.loading-text').html(count / len * 100 + '%');
+
+            if ( count >= len ) {
+                //回调函数
+                callback && callback();
+
+                // loading hide
+                $('.popup-loading').hide();
+            }
+        }
     };
 
     /**

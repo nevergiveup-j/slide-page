@@ -2,30 +2,7 @@
 <html>
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=640, user-scalable=no, target-densitydpi=device-dpi">
-<!--移动端版本兼容 -->
-<script>
-var mengvalue = -1;
-//if(mengvalue<0){mengvalue=0;}
-var phoneWidth = parseInt(window.screen.width);
-var phoneScale = phoneWidth / 640;
-
-var ua = navigator.userAgent;
-if (/Android (\d+\.\d+)/.test(ua)) {
-    var version = parseFloat(RegExp.$1);
-    // andriod 2.3
-    if (version > 2.3) {
-        document.write('<meta name="viewport" content="width=640, minimum-scale = ' + phoneScale + ', maximum-scale = ' + phoneScale + ', target-densitydpi=device-dpi">');
-        // andriod 2.3以上
-    } else {
-        document.write('<meta name="viewport" content="width=640, target-densitydpi=device-dpi">');
-    }
-    // 其他系统
-} else {
-    document.write('<meta name="viewport" content="width=640, user-scalable=no, target-densitydpi=device-dpi">');
-}
-</script>
-<!--移动端版本兼容 end -->
+<meta id="viewport" name="viewport" content="initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
 <meta name="format-detection" content="telephone=no">
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <link rel="stylesheet" type="text/css" href="css/main.css">
@@ -64,9 +41,6 @@ if (/Android (\d+\.\d+)/.test(ua)) {
     </div>
     <div class="fixed-arrow"></div>
 </div>
-
-<!--<a href="javascript:" style="position: fixed;top:0;left:0;z-index: 9999;background: #fff;width: 100px;height: 100px;" class="page-next">上一页</a>-->
-<!--<a href="javascript:" style="position: fixed;top:0;right:0;z-index: 9999;background: #fff;width: 100px;height: 100px;" class="page-next">下一页</a>-->
 </body>
 </html>
 <script src="js/zepto.min.js"></script>
@@ -74,27 +48,31 @@ if (/Android (\d+\.\d+)/.test(ua)) {
 
 
 <script>
-    var SlidePage = new SlidePage({
-        lastReturnFirst: true,
-        // 触摸开始回调
-        touchStartCallback: function(event, options){
+var SlidePage = new SlidePage({
+    lastReturnFirst: true,
+    loadImgData: [
+        'images/pages_4.jpg',
+        'images/pages_4.jpg'
+    ],
+    // 触摸开始回调
+    touchStartCallback: function(event, options){
 
-        },
-        // 触摸移动回调
-        touchMoveCallback: function(event, options){
+    },
+    // 触摸移动回调
+    touchMoveCallback: function(event, options){
 
-        },
-        // 触摸结束回调
-        touchEndCallback: function(event, options){
+    },
+    // 触摸结束回调
+    touchEndCallback: function(event, options){
 
-        },
-        // 页面切换成功
-        successCallback:  function(options) {
+    },
+    // 页面切换成功
+    successCallback:  function(options) {
 
-        },
-        // 页面切换失败
-        failCallback:  function(options) {
+    },
+    // 页面切换失败
+    failCallback:  function(options) {
 
-        }
-    });
+    }
+});
 </script>
