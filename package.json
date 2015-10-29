@@ -1,7 +1,7 @@
 {
-  "name": "h5 slide-page",
+  "name": "h5slide-page",
   "author": "wangjun",
-  "version": "2.0",
+  "version": "2.0.0",
   "github": "https://github.com/nevergiveup-j/slide-page",
   "devDependencies": {
     "grunt": "~0.4.2",

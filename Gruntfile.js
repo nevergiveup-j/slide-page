@@ -1,9 +1,4 @@
 module.exports = function(grunt) {
-
-	// var transport = require('grunt-cmd-transport');
-	// var style = transport.style.init(grunt);
-	// var text = transport.text.init(grunt);
-	// var script = transport.script.init(grunt);
 	
     grunt.initConfig({
 		pkg: grunt.file.readJSON('package.json'),

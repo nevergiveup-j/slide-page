@@ -1,8 +1,8 @@
 /**
  * @Description: H5滑动翻页
  * @Author: wangjun
- * @Update: 2015-10-14 16:00
- * @version: 2.0
+ * @Update: 2015-10-29 16:00
+ * @version: 2.1
  * @Github URL: https://github.com/nevergiveup-j/slide-page
  */
 
@@ -252,7 +252,7 @@
             count += 1;
 
             // 百分比
-            $('.loading-text').html(count / len * 100 + '%');
+            $('.loading-text').html(Math.floor(count / len * 100) + '%');
 
             if ( count >= len ) {
                 //回调函数
